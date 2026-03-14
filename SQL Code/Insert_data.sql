@@ -72,6 +72,24 @@ INSERT INTO Student_Course (NYU_Email, Course_ID) VALUES
 ('ab1014@nyu.edu',114),
 ('ab1015@nyu.edu',115);
 
+--Location
+INSERT INTO Location (Location_ID, Building, Room, Capacity) VALUES
+(1,'5 Metro Tech','301',4),
+(2,'5 Metro Tech','312',6),
+(3,'5 Metro Tech','325',5),
+(4,'5 Metro Tech','337',4),
+(5,'5 Metro Tech','348',8),
+(6,'5 Metro Tech','401',6),
+(7,'5 Metro Tech','415',5),
+(8,'5 Metro Tech','428',4),
+(9,'6 Metro Tech','210',6),
+(10,'6 Metro Tech','318',5),
+(11,'6 Metro Tech','422',8),
+(12,'6 Metro Tech','537',6),
+(13,'6 Metro Tech','604',4),
+(14,'6 Metro Tech','712',6),
+(15,'6 Metro Tech','745',5);
+
 ---Meeting
 INSERT INTO Meeting (Meeting_ID, Start_Time, End_Time, Meeting_Note, Num_Of_Students, Course_ID, Location_ID) VALUES
 (1,'2026-03-20','2026-03-20','Database review',5,101,1),
@@ -162,20 +180,3 @@ INSERT INTO Study_Material (Study_Material_ID, File_Name, File_Path, Meeting_ID)
 (14,'hci_design.pdf','/materials/hci_design.pdf',14),
 (15,'graphics_notes.pdf','/materials/graphics_notes.pdf',15);
 
---Location
-INSERT INTO Location (Location_ID, Building, Room, Capacity) VALUES
-(1,'5 Metro Tech','301',4),
-(2,'5 Metro Tech','312',6),
-(3,'5 Metro Tech','325',5),
-(4,'5 Metro Tech','337',4),
-(5,'5 Metro Tech','348',8),
-(6,'5 Metro Tech','401',6),
-(7,'5 Metro Tech','415',5),
-(8,'5 Metro Tech','428',4),
-(9,'6 Metro Tech','210',6),
-(10,'6 Metro Tech','318',5),
-(11,'6 Metro Tech','422',8),
-(12,'6 Metro Tech','537',6),
-(13,'6 Metro Tech','604',4),
-(14,'6 Metro Tech','712',6),
-(15,'6 Metro Tech','745',5);
