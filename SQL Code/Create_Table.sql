@@ -15,8 +15,8 @@ CREATE TABLE Student_Available_Time {
     Time_ID INT,
     Week_Day INT NOT NULL,
     NYU_Email VARCHAR(15),
-    Start_Time DATE,
-    End_Time DATE,
+    Start_Time TIME, --Only includes time. No date. The day is stored in the Week_Day attribute
+    End_Time TIME,
     PRIMARY KEY (Time_ID),
     Foreign KEY (NYU_Email) REFERENCES Student(NYU_Email)
 }
@@ -40,8 +40,8 @@ CREATE TABLE Student_Course {
 ---Meeting
 CREATE TABLE Meeting {
     Meeting_ID INT,
-    Start_Time DATE NOT NULL,
-    End_Time DATE,
+    Start_Time DATETIME NOT NULL, --Note that the type if DATETIME, which includes both date and time since meeting needs both
+    End_Time DATETIME,
     Meeting_Note TEXT,
     Num_Of_Students INT,
     Course_ID INT,
