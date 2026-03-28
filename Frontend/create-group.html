@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create New Group</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="page page-light">
+    <section class="card-wide">
+      <div class="dashboard-grid">
+        <aside class="icon-rail">
+          <a class="home-icon" href="dashboard.html">⌂</a>
+        </aside>
+
+        <section>
+          <h1 class="page-title">Create New Group</h1>
+          <form action="group-details.html" style="margin-top: 16px;">
+            <div class="form-grid">
+              <div class="form-group"><label>Course Name</label><input type="text" /></div>
+              <div class="form-group"><label>Course ID (Same in Albert)</label><input type="text" /></div>
+              <div class="form-group"><label>Start Time</label><input type="text" /></div>
+              <div class="form-group"><label>End Time</label><input type="text" /></div>
+              <div class="form-group">
+                <label>Month / Year</label>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                  <select><option>Sep</option><option>Oct</option><option>Nov</option></select>
+                  <select><option>2025</option><option>2026</option></select>
+                </div>
+              </div>
+              <div class="form-group"><label>Notes</label><input type="text" /></div>
+              <div class="form-group"><label>Building</label><input type="text" /></div>
+              <div class="form-group"><label>Capacity</label><input type="number" /></div>
+              <div class="form-group"><label>Room</label><input type="text" /></div>
+            </div>
+            <div class="actions">
+              <button class="btn btn-primary" type="submit" style="min-width: 140px;">Create</button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
