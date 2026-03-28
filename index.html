@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StuBud</title>
+  <style>
+    :root {
+      --primary: #5b21b6;
+      --primary-dark: #4c1d95;
+      --bg: #f4f1f5;
+      --surface: #ffffff;
+      --text: #1f1b2d;
+      --muted: #6b7280;
+      --shadow: 0 10px 30px rgba(91, 33, 182, 0.12);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: Georgia, "Times New Roman", serif;
+      background: #ececec;
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 20px;
+    }
+
+    .landing-card {
+      width: 100%;
+      max-width: 760px;
+      background: var(--surface);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 48px 32px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 4rem;
+      margin-bottom: 14px;
+    }
+
+    p {
+      color: var(--muted);
+      font-size: 1.1rem;
+      margin-bottom: 34px;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 180px;
+      padding: 12px 20px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 700;
+      transition: 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: var(--text);
+    }
+  </style>
+</head>
+<body>
+  <main class="landing-card">
+    <h1>StuBud</h1>
+    <p>Study group matching platform prototype</p>
+
+    <div class="actions">
+      <a class="btn btn-primary" href="Frontend/login.html">Student Login</a>
+      <a class="btn btn-primary" href="Frontend/signup.html">Student Sign Up</a>
+      <a class="btn btn-secondary" href="Frontend/admin-login.html">Admin Login</a>
+    </div>
+  </main>
+</body>
+</html>
