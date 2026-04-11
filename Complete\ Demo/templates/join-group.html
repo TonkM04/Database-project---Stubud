@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Join Group</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+</head>
+<body>
+  <main class="page page-light">
+    <section class="card compact center-stack" style="max-width: 620px; min-height: 520px; justify-content: center;">
+      <h1 class="page-title" style="font-size: 2.3rem;" id="joinPrompt">Looking for a group to join?</h1>
+      
+      <div style="width: 100%; max-width: 320px;">
+        <div class="form-group">
+          <label for="groupSelect">Select a Group</label>
+          <select id="groupSelect">
+            <option value="">Loading groups...</option>
+          </select>
+        </div>
+      </div>
+
+      <article class="group-card" id="selectedGroupInfo" style="width:100%; max-width: 320px; text-align:left;">
+        <p>Select a group to see details</p>
+      </article>
+
+      <div class="action-stack" style="min-width: 180px;">
+        <button class="btn btn-primary" id="acceptBtn" onclick="joinGroup()">Accept</button>
+        <a class="btn btn-secondary" href="/groups">Back to Groups</a>
+      </div>
+    </section>
+  </main>
+  <script>
+    let groups = [];
+    let selectedGroup = null;
+
+    async function loadGroups() {
+      try {
+        const response = await fetch('/api/groups');
+        groups = await response.json();
+        
+        const select = document.getElementById('groupSelect');
+        select.innerHTML = '<option value="">Choose a group...</option>' +
+          groups.map(g => `<option value="${g.meeting_id}">Meeting ${g.meeting_id} - ${g.course_name}</option>`).join('');
+        
+        select.addEventListener('change', (e) => {
+          const selected = groups.find(g => g.meeting_id == e.target.value);
+          selectedGroup = selected;
+          if (selected) {
+            document.getElementById('selectedGroupInfo').innerHTML = `
+              <h4>Meeting ${selected.meeting_id}</h4>
+              <p class="meta">
+                Start: ${new Date(selected.start_time).toLocaleString()}<br>
+                End: ${new Date(selected.end_time).toLocaleString()}<br>
+                Course: ${selected.course_name}<br>
+                Location: ${selected.building} Room ${selected.room}
+              </p>
+            `;
+          }
+        });
+      } catch (error) {
+        console.error('Error loading groups:', error);
+      }
+    }
+
+    async function joinGroup() {
+      if (!selectedGroup) {
+        alert('Please select a group');
+        return;
+      }
+      
+      try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/join-group', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            meeting_id: selectedGroup.meeting_id
+          })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          alert('You have successfully joined Meeting ' + selectedGroup.meeting_id + '!');
+          window.location.href = '/dashboard';
+        } else {
+          alert(data.error || 'Failed to join group');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error joining group');
+      }
+    }
+
+    loadGroups();
+  </script>
+</body>
+</html>

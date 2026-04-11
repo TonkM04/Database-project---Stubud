@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StuBud Sign Up</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+</head>
+<body>
+  <main class="page page-light">
+    <section class="card compact" style="max-width: 460px; padding: 42px;">
+      <h1 class="brand" style="font-size: 4rem;">StuBud</h1>
+
+      <form id="signupForm" style="max-width: 320px; margin: 18px auto 0;">
+        <div class="form-group">
+          <label for="first-name">First Name</label>
+          <input id="first-name" type="text" required />
+        </div>
+
+        <div class="form-group">
+          <label for="last-name">Last Name</label>
+          <input id="last-name" type="text" required />
+        </div>
+
+        <div class="form-group">
+          <label for="email">NYU Email</label>
+          <input id="email" type="email" placeholder="netid@nyu.edu" required />
+        </div>
+
+        <div class="form-group">
+          <label for="signup-password">Password</label>
+          <input id="signup-password" type="password" required />
+        </div>
+
+        <button class="btn btn-primary btn-block" type="submit">Sign Up</button>
+      </form>
+
+      <div class="link-row">
+        <a href="/login">Already have an account?</a>
+      </div>
+    </section>
+  </main>
+  <script>
+    document.getElementById('signupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const firstName = document.getElementById('first-name').value;
+      const lastName = document.getElementById('last-name').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('signup-password').value;
+      
+      try {
+        const response = await fetch('/auth/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nyu_email: email,
+            first_name: firstName,
+            last_name: lastName,
+            password: password
+          })
+        });
+        const data = await response.json();
+        if (response.ok) {
+          localStorage.setItem('token', data.token);
+          window.location.href = '/dashboard';
+        } else {
+          alert(data.error || 'Signup failed');
+        }
+      } catch (error) {
+        alert('Error: ' + error.message);
+      }
+    });
+  </script>
+</body>
+</html>

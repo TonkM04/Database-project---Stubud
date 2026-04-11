@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+</head>
+<body>
+  <main class="page page-light">
+    <section class="card-wide">
+      <div class="dashboard-grid">
+        <aside class="icon-rail">
+          <a class="home-icon" href="/dashboard">⌂</a>
+        </aside>
+
+        <section>
+          <h1 class="page-title">Profile</h1>
+          <form id="profileForm" style="margin-top: 18px; max-width: 760px;">
+            <div class="form-grid">
+              <div class="form-group"><label>First Name</label><input id="firstName" type="text" /></div>
+              <div class="form-group"><label>Last Name</label><input id="lastName" type="text" /></div>
+              <div class="form-group"><label>Email</label><input id="email" type="email" disabled /></div>
+              <div></div>
+            </div>
+
+            <div class="form-row-3" style="margin-top: 10px;">
+              <div class="form-group">
+                <label>Week Day</label>
+                <select id="weekDay">
+                  <option></option>
+                  <option>Monday</option>
+                  <option>Tuesday</option>
+                  <option>Wednesday</option>
+                  <option>Thursday</option>
+                  <option>Friday</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Start Time</label>
+                <input id="startTime" type="time" />
+              </div>
+              <div class="form-group">
+                <label>End Time</label>
+                <input id="endTime" type="time" />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>New Password (leave blank to keep current)</label>
+              <input id="password" type="password" />
+            </div>
+
+            <div class="actions">
+              <button class="btn btn-primary" type="submit">Update Profile</button>
+              <a class="btn btn-secondary" href="/dashboard">Cancel</a>
+            </div>
+          </form>
+        </section>
+      </div>
+    </section>
+  </main>
+  <script>
+    async function loadProfile() {
+      const token = localStorage.getItem('token');
+      try {
+        const response = await fetch('/api/profile', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        if (response.ok) {
+          document.getElementById('firstName').value = data.student.first_name || '';
+          document.getElementById('lastName').value = data.student.last_name || '';
+          document.getElementById('email').value = data.student.nyu_email || '';
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+
+    document.getElementById('profileForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const token = localStorage.getItem('token');
+      
+      const updateData = {
+        first_name: document.getElementById('firstName').value,
+        last_name: document.getElementById('lastName').value
+      };
+
+      if (document.getElementById('password').value) {
+        updateData.password = document.getElementById('password').value;
+      }
+
+      try {
+        const response = await fetch('/api/profile', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(updateData)
+        });
+
+        if (response.ok) {
+          alert('Profile updated successfully!');
+        } else {
+          const error = await response.json();
+          alert(error.error || 'Failed to update profile');
+        }
+      } catch (error) {
+        alert('Error: ' + error.message);
+      }
+    });
+
+    loadProfile();
+  </script>
+</body>
+</html>

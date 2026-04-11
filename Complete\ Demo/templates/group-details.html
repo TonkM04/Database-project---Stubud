@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Group Details</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+</head>
+<body>
+  <main class="page page-light">
+    <section class="card-wide">
+      <div class="dashboard-grid">
+        <aside class="icon-rail">
+          <a class="home-icon" href="/dashboard">⌂</a>
+        </aside>
+
+        <section>
+          <h1 class="page-title" id="groupTitle">Group Details</h1>
+          <div class="split" style="margin-top: 24px;">
+            <article class="small-info" id="groupInfo">
+              <p>Loading group information...</p>
+            </article>
+
+            <article>
+              <div class="rating" id="groupRating">Rating: --</div>
+              <label for="rate">Rate this group 1-10:</label>
+              <input id="rate" type="number" min="1" max="10" style="margin-top: 8px; max-width: 240px;" />
+            </article>
+          </div>
+
+          <div id="studentsContainer" class="student-list">
+            <p>Loading students...</p>
+          </div>
+
+          <div class="actions center-actions">
+            <a class="btn btn-primary" href="/group-feedback">See Feedback</a>
+            <a class="btn btn-primary" href="/groups">Back to Groups</a>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+  <script>
+    async function loadGroupDetails() {
+      const meetingId = new URLSearchParams(window.location.search).get('meeting_id');
+      if (!meetingId) {
+        document.getElementById('groupInfo').innerHTML = '<p>No group selected</p>';
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/groups');
+        const groups = await response.json();
+        const group = groups.find(g => g.meeting_id == meetingId);
+        
+        if (group) {
+          document.getElementById('groupTitle').textContent = `Meeting ${group.meeting_id}`;
+          document.getElementById('groupInfo').innerHTML = `
+            <p>Start Time: ${new Date(group.start_time).toLocaleString()}</p>
+            <p>End Time: ${new Date(group.end_time).toLocaleString()}</p>
+            <p>Course: ${group.course_name || 'N/A'}</p>
+            <p>Location: ${group.building} Room ${group.room}</p>
+            <p>Notes: ${group.meeting_note || 'N/A'}</p>
+          `;
+          document.getElementById('studentsContainer').innerHTML = '<p>Students list coming soon</p>';
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+
+    loadGroupDetails();
+  </script>
+</body>
+</html>

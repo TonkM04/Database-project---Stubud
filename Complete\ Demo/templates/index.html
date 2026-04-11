@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Index</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+</head>
+<body>
+  <main class="page page-light">
+    <section style="width: 100%; max-width: 760px; background: white; border-radius: 24px; box-shadow: 0 10px 30px rgba(91, 33, 182, 0.12); padding: 48px 32px; text-align: center;">
+      <h1 style="font-size: 4rem; margin-bottom: 14px;">StuBud</h1>
+      <p style="font-size: 1.2rem; color: #6b7280; margin-bottom: 32px;">Connect with study groups at NYU</p>
+      
+      <div style="display: flex; flex-direction: column; gap: 12px; max-width: 240px; margin: 0 auto;">
+        <a href="/login" class="btn btn-primary btn-block">Login</a>
+        <a href="/signup" class="btn btn-primary btn-block">Sign Up</a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

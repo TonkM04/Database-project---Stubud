@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create New Group</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+</head>
+<body>
+  <main class="page page-light">
+    <section class="card-wide">
+      <div class="dashboard-grid">
+        <aside class="icon-rail">
+          <a class="home-icon" href="/dashboard">⌂</a>
+        </aside>
+
+        <section>
+          <h1 class="page-title">Create New Group</h1>
+          <form id="createGroupForm" style="margin-top: 16px;">
+            <div class="form-grid">
+              <div class="form-group"><label>Course Name</label><input id="courseName" type="text" required /></div>
+              <div class="form-group"><label>Course ID</label><input id="courseId" type="text" required /></div>
+              <div class="form-group"><label>Start Time</label><input id="startTime" type="datetime-local" required /></div>
+              <div class="form-group"><label>End Time</label><input id="endTime" type="datetime-local" required /></div>
+              <div class="form-group"><label>Building</label><input id="building" type="text" required /></div>
+              <div class="form-group"><label>Room</label><input id="room" type="text" required /></div>
+              <div class="form-group"><label>Capacity</label><input id="capacity" type="number" required /></div>
+              <div class="form-group"><label>Notes</label><input id="notes" type="text" /></div>
+            </div>
+            <div class="actions">
+              <button class="btn btn-primary" type="submit" style="min-width: 140px;">Create</button>
+              <a class="btn btn-secondary" href="/groups">Cancel</a>
+            </div>
+          </form>
+        </section>
+      </div>
+    </section>
+  </main>
+  <script>
+    document.getElementById('createGroupForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const token = localStorage.getItem('token');
+      
+      const data = {
+        course_name: document.getElementById('courseName').value,
+        course_id: document.getElementById('courseId').value,
+        start_time: document.getElementById('startTime').value,
+        end_time: document.getElementById('endTime').value,
+        building: document.getElementById('building').value,
+        room: document.getElementById('room').value,
+        capacity: parseInt(document.getElementById('capacity').value),
+        meeting_note: document.getElementById('notes').value
+      };
+
+      try {
+        const response = await fetch('/api/create-group', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(data)
+        });
+        const result = await response.json();
+        if (response.ok) {
+          alert('Group created successfully!');
+          window.location.href = '/groups';
+        } else {
+          alert(result.error || 'Failed to create group');
+        }
+      } catch (error) {
+        alert('Error: ' + error.message);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Group Feedback</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+</head>
+<body>
+  <main class="page page-light">
+    <section class="card-wide">
+      <div class="dashboard-grid">
+        <aside class="icon-rail">
+          <a class="home-icon" href="/group-details">⌂</a>
+        </aside>
+
+        <section>
+          <h1 class="page-title">Group Feedback</h1>
+          <div class="feedback-list" id="feedbackContainer" style="margin-top: 26px;">
+            <p>Loading feedback...</p>
+          </div>
+
+          <div class="actions center-actions">
+            <a class="btn btn-primary" href="/groups">Back to Groups</a>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+  <script>
+    async function loadFeedback() {
+      const meetingId = new URLSearchParams(window.location.search).get('meeting_id');
+      try {
+        const response = await fetch(`/api/group-feedback?meeting_id=${meetingId}`);
+        const feedbacks = await response.json();
+        
+        const container = document.getElementById('feedbackContainer');
+        if (feedbacks && feedbacks.length > 0) {
+          container.innerHTML = feedbacks.map(f => `
+            <article class="feedback-card">
+              <div class="avatar-placeholder">◌</div>
+              <div>
+                <h4>${f.nyu_email}</h4>
+                <p class="meta">Rating: ${f.rating}/10</p>
+                <p class="meta">${f.comment || 'No comment'}</p>
+              </div>
+            </article>
+          `).join('');
+        } else {
+          container.innerHTML = '<p>No feedback yet</p>';
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+
+    loadFeedback();
+  </script>
+</body>
+</html>

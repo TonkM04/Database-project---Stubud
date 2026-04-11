@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Groups</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+</head>
+<body>
+  <main class="page page-light">
+    <section class="card-wide">
+      <div class="dashboard-grid">
+        <aside class="icon-rail">
+          <a class="home-icon" href="/dashboard">⌂</a>
+        </aside>
+
+        <section>
+          <div class="topbar">
+            <h1 class="page-title">Groups</h1>
+            <input class="search" id="searchInput" type="text" placeholder="Search" />
+          </div>
+
+          <div class="dual-columns" style="align-items: start;">
+            <section>
+              <h4 style="margin-bottom: 10px;">Active Groups</h4>
+              <div id="activeGroupsContainer" class="grid-cards">
+                <p>Loading groups...</p>
+              </div>
+            </section>
+
+            <section>
+              <h4 style="margin-bottom: 10px;">Expired Groups</h4>
+              <div id="expiredGroupsContainer" class="grid-cards">
+                <p>Loading groups...</p>
+              </div>
+            </section>
+          </div>
+
+          <div class="actions" style="justify-content: flex-end;">
+            <a class="btn btn-primary" href="/create-group">Create New</a>
+            <a class="btn btn-primary" href="/dashboard">Back to Dashboard</a>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+  <script>
+    async function loadGroups() {
+      try {
+        const response = await fetch('/api/groups');
+        const groups = await response.json();
+        const now = new Date();
+        const active = groups.filter(g => new Date(g.end_time) > now);
+        const expired = groups.filter(g => new Date(g.end_time) <= now);
+
+        document.getElementById('activeGroupsContainer').innerHTML = active.length > 0 ? 
+          active.map(g => `
+            <a href="#" class="group-card">
+              <h4>Meeting ${g.meeting_id}</h4>
+              <p class="meta">
+                Start: ${new Date(g.start_time).toLocaleString()}<br>
+                End: ${new Date(g.end_time).toLocaleString()}<br>
+                Note: ${g.meeting_note || 'N/A'}<br>
+                Students: ${g.num_of_students || 'N/A'}<br>
+                Location: ${g.building || 'N/A'} ${g.room || ''}
+              </p>
+            </a>
+          `).join('') : '<p>No active groups</p>';
+
+        document.getElementById('expiredGroupsContainer').innerHTML = expired.length > 0 ?
+          expired.map(g => `
+            <a href="#" class="group-card">
+              <h4>Meeting ${g.meeting_id}</h4>
+              <p class="meta">
+                Start: ${new Date(g.start_time).toLocaleString()}<br>
+                End: ${new Date(g.end_time).toLocaleString()}<br>
+                Note: ${g.meeting_note || 'N/A'}<br>
+                Students: ${g.num_of_students || 'N/A'}<br>
+                Location: ${g.building || 'N/A'} ${g.room || ''}
+              </p>
+            </a>
+          `).join('') : '<p>No expired groups</p>';
+      } catch (error) {
+        console.error('Error loading groups:', error);
+      }
+    }
+
+    loadGroups();
+  </script>
+</body>
+</html>

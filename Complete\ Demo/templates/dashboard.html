@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StuBud Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+</head>
+<body>
+  <main class="page page-light">
+    <section class="card-wide">
+      <div class="topbar" style="align-items: center;">
+        <div>
+          <h1 class="page-title">Dashboard</h1>
+          <p class="section-subtitle">Groups you've joined</p>
+        </div>
+      </div>
+
+      <div class="dual-columns">
+        <section id="groupsContainer">
+          <div class="grid-cards" style="grid-template-columns: 1fr; max-width: 430px;">
+            <p>Loading groups...</p>
+          </div>
+        </section>
+
+        <aside class="action-stack" style="justify-self: end; margin-top: 16px;">
+          <a class="btn btn-primary" href="/profile">Edit Profile</a>
+          <a class="btn btn-primary" href="/join-group">Join Group</a>
+          <a class="btn btn-primary" href="/groups">All Groups</a>
+          <a class="btn btn-primary" href="/students">See Students</a>
+          <a class="btn btn-primary" href="/logout">Logout</a>
+        </aside>
+      </div>
+    </section>
+  </main>
+  <script>
+    async function loadDashboard() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        window.location.href = '/login';
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/dashboard', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await response.json();
+        if (response.ok) {
+          const container = document.getElementById('groupsContainer');
+          if (data.joined_groups && data.joined_groups.length > 0) {
+            container.innerHTML = '<div class="grid-cards" style="grid-template-columns: 1fr; max-width: 430px;">' +
+              data.joined_groups.map(g => `
+                <article class="group-card">
+                  <h4>Meeting ${g.meeting_id}</h4>
+                  <p class="meta">Start: ${new Date(g.start_time).toLocaleString()}<br>
+                  End: ${new Date(g.end_time).toLocaleString()}<br>
+                  Note: ${g.meeting_note || 'N/A'}<br>
+                  Students: ${g.num_of_students || 'N/A'}<br>
+                  Location: ${g.building || 'N/A'} ${g.room || ''}</p>
+                </article>
+              `).join('') + '</div>';
+          } else {
+            container.innerHTML = '<p>No groups joined yet.</p>';
+          }
+        } else {
+          alert('Failed to load dashboard');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error loading dashboard');
+      }
+    }
+
+    loadDashboard();
+  </script>
+</body>
+</html>

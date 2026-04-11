@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Students</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+</head>
+<body>
+  <main class="page page-light">
+    <section class="card-wide">
+      <div class="dashboard-grid">
+        <aside class="icon-rail">
+          <a class="home-icon" href="/dashboard">⌂</a>
+        </aside>
+
+        <section>
+          <div class="topbar">
+            <h1 class="page-title">Students</h1>
+            <input class="search" id="searchInput" type="text" placeholder="Search by name or email" />
+          </div>
+
+          <div class="student-list" id="studentsContainer" style="margin-top: 40px;">
+            <p>Loading students...</p>
+          </div>
+
+          <div class="actions">
+            <a class="btn btn-primary" href="/dashboard">Back to Dashboard</a>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+  <script>
+    let allStudents = [];
+
+    async function loadStudents() {
+      try {
+        const response = await fetch('/students');
+        if (response.ok) {
+          allStudents = await response.json();
+          displayStudents(allStudents);
+        }
+      } catch (error) {
+        console.error('Error loading students:', error);
+        document.getElementById('studentsContainer').innerHTML = '<p>Error loading students</p>';
+      }
+    }
+
+    function displayStudents(students) {
+      const container = document.getElementById('studentsContainer');
+      if (students && students.length > 0) {
+        container.innerHTML = students.map(s => `
+          <a href="/student-info?nyu_email=${encodeURIComponent(s.nyu_email)}" class="student-chip">
+            <div class="student-chip-inner">
+              <span class="small-avatar">◻</span>
+              ${s.first_name} ${s.last_name}
+            </div>
+          </a>
+        `).join('');
+      } else {
+        container.innerHTML = '<p>No students found</p>';
+      }
+    }
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase();
+      const filtered = allStudents.filter(s => 
+        s.first_name.toLowerCase().includes(query) || 
+        s.last_name.toLowerCase().includes(query) ||
+        s.nyu_email.toLowerCase().includes(query)
+      );
+      displayStudents(filtered);
+    });
+
+    loadStudents();
+  </script>
+</body>
+</html>
