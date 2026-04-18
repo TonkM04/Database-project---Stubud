@@ -1,7 +1,6 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, g, jsonify, request
 
 from services.auth import hash_password, require_auth
-from services.db import supabase
 from services.responses import error_response
 from services.student_service import (
     fetch_profile_bundle,
@@ -42,7 +41,7 @@ def update_profile():
     try:
         if student_updates:
             (
-                supabase.table("student")
+                g.db.table("student")
                 .update(student_updates)
                 .eq("nyu_email", request.user_email)
                 .execute()

@@ -4,19 +4,29 @@ from functools import wraps
 
 import bcrypt
 import jwt
-from flask import request
+from flask import g, request
 
-from config import JWT_ALGORITHM, JWT_SECRET
+from config import SUPABASE_JWT_SECRET
 from services.responses import error_response
+
+_ALGORITHM = "HS256"
 
 
 def build_token(student):
+    now = datetime.now(timezone.utc)
     payload = {
+        # Supabase-required claims — these make Supabase assign the "authenticated" role
+        "sub": student["nyu_email"],
+        "role": "authenticated",
+        "aud": "authenticated",
+        "iss": "supabase",
+        "iat": now,
+        "exp": now + timedelta(days=7),
+        # Custom claims — readable by Flask and by RLS policies via auth.jwt()
         "nyu_email": student["nyu_email"],
         "account_role": student["account_role"],
-        "exp": datetime.now(timezone.utc) + timedelta(days=7),
     }
-    return jwt.encode(payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+    return jwt.encode(payload, SUPABASE_JWT_SECRET, algorithm=_ALGORITHM)
 
 
 def sanitize_student(student):
@@ -61,7 +71,12 @@ def require_auth(fn):
             return error_response("Missing bearer token", 401)
 
         try:
-            payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+            payload = jwt.decode(
+                token,
+                SUPABASE_JWT_SECRET,
+                algorithms=[_ALGORITHM],
+                audience="authenticated",
+            )
         except jwt.ExpiredSignatureError:
             return error_response("Token has expired", 401)
         except jwt.InvalidTokenError:
@@ -69,6 +84,12 @@ def require_auth(fn):
 
         request.user_email = payload["nyu_email"]
         request.user_role = payload["account_role"]
+
+        # Attach a user-scoped Supabase client so every DB call in this request
+        # carries the JWT — this is what makes Supabase RLS enforce the user's identity
+        from services.db import get_authed_client
+        g.db = get_authed_client(token)
+
         return fn(*args, **kwargs)
 
     return wrapper
