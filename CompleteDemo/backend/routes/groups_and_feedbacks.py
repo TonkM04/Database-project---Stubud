@@ -1,7 +1,7 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, g, jsonify, request
 
-from services.db import supabase
 from services.auth import require_auth
+from services.db import supabase
 from services.responses import error_response
 
 groups_feedback_bp = Blueprint("groups_feedback", __name__)
@@ -49,7 +49,6 @@ def get_groups():
 @groups_feedback_bp.route("/api/join-group", methods=["POST"])
 @require_auth
 def join_group():
-    """Join a group (create a meeting_request record)"""
     data = request.get_json(silent=True) or {}
     meeting_id = data.get("meeting_id")
 
@@ -57,9 +56,8 @@ def join_group():
         return error_response("meeting_id is required", 400)
 
     try:
-        # Check if student is already in this meeting
         existing = (
-            supabase.table("meeting_request")
+            g.db.table("meeting_request")
             .select("*")
             .eq("nyu_email", request.user_email)
             .eq("meeting_id", meeting_id)
@@ -69,20 +67,21 @@ def join_group():
         if existing.data:
             return error_response("You have already joined this group", 409)
 
-        # Create meeting request
-        response = supabase.table("meeting_request").insert(
-            {
-                "nyu_email": request.user_email,
-                "meeting_id": meeting_id,
-            }
-        ).execute()
+        response = (
+            g.db.table("meeting_request")
+            .insert({"nyu_email": request.user_email, "meeting_id": meeting_id})
+            .execute()
+        )
 
-        return jsonify(
-            {
-                "message": "Successfully joined the group",
-                "meeting_request": response.data[0] if response.data else None,
-            }
-        ), 201
+        return (
+            jsonify(
+                {
+                    "message": "Successfully joined the group",
+                    "meeting_request": response.data[0] if response.data else None,
+                }
+            ),
+            201,
+        )
     except Exception as exc:
         return error_response(f"Failed to join group: {exc}", 500)
 
@@ -104,24 +103,19 @@ def create_group():
         return error_response("All fields are required", 400)
 
     try:
-        # Insert course if not exists
         supabase.table("course").insert(
             {"course_id": course_id, "course_name": course_name}
         ).execute()
-    except:
-        # Course might already exist
+    except Exception:
         pass
 
     try:
-        # Insert location if not exists
         supabase.table("location").insert(
             {"building": building, "room": room, "capacity": capacity}
         ).execute()
-    except:
-        # Location might already exist
+    except Exception:
         pass
 
-    # Get location_id
     location_response = (
         supabase.table("location")
         .select("location_id")
@@ -136,24 +130,30 @@ def create_group():
 
     location_id = location_response.data[0]["location_id"]
 
-    # Create meeting
     try:
-        meeting_response = supabase.table("meeting").insert(
-            {
-                "start_time": start_time,
-                "end_time": end_time,
-                "meeting_note": meeting_note,
-                "course_id": course_id,
-                "location_id": location_id,
-            }
-        ).execute()
+        meeting_response = (
+            supabase.table("meeting")
+            .insert(
+                {
+                    "start_time": start_time,
+                    "end_time": end_time,
+                    "meeting_note": meeting_note,
+                    "course_id": course_id,
+                    "location_id": location_id,
+                }
+            )
+            .execute()
+        )
 
-        return jsonify(
-            {
-                "message": "Group created successfully",
-                "meeting": meeting_response.data[0] if meeting_response.data else None,
-            }
-        ), 201
+        return (
+            jsonify(
+                {
+                    "message": "Group created successfully",
+                    "meeting": meeting_response.data[0] if meeting_response.data else None,
+                }
+            ),
+            201,
+        )
     except Exception as exc:
         return error_response(f"Failed to create group: {exc}", 500)
 
@@ -187,20 +187,27 @@ def create_feedback():
         return error_response("meeting_id, nyu_email, and rating are required", 400)
 
     try:
-        feedback_response = supabase.table("feedback").insert(
-            {
-                "meeting_id": meeting_id,
-                "nyu_email": nyu_email,
-                "rating": rating,
-                "comment": comment,
-            }
-        ).execute()
+        feedback_response = (
+            supabase.table("feedback")
+            .insert(
+                {
+                    "meeting_id": meeting_id,
+                    "nyu_email": nyu_email,
+                    "rating": rating,
+                    "comment": comment,
+                }
+            )
+            .execute()
+        )
 
-        return jsonify(
-            {
-                "message": "Feedback submitted successfully",
-                "feedback": feedback_response.data[0] if feedback_response.data else None,
-            }
-        ), 201
+        return (
+            jsonify(
+                {
+                    "message": "Feedback submitted successfully",
+                    "feedback": feedback_response.data[0] if feedback_response.data else None,
+                }
+            ),
+            201,
+        )
     except Exception as exc:
         return error_response(f"Failed to submit feedback: {exc}", 500)

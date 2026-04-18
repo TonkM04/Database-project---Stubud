@@ -1,7 +1,6 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, g, jsonify, request
 
 from services.auth import require_auth
-from services.db import supabase
 from services.responses import error_response
 from services.student_service import fetch_profile_bundle
 
@@ -15,25 +14,22 @@ def get_dashboard():
     if not profile:
         return error_response("Student not found", 404)
 
-    # Get meeting requests for this student
     meeting_request_response = (
-        supabase.table("meeting_request")
+        g.db.table("meeting_request")
         .select("meeting_id")
         .eq("nyu_email", request.user_email)
         .execute()
     )
 
     joined_groups = []
-    
-    # For each meeting request, fetch the meeting and its details
+
     for row in meeting_request_response.data:
         meeting_id = row.get("meeting_id")
         if not meeting_id:
             continue
-            
-        # Get meeting details
+
         meeting_response = (
-            supabase.table("meeting")
+            g.db.table("meeting")
             .select(
                 """
                 meeting_id,
@@ -49,17 +45,16 @@ def get_dashboard():
             .limit(1)
             .execute()
         )
-        
+
         if not meeting_response.data:
             continue
-            
+
         meeting = meeting_response.data[0]
-        
-        # Get course details
+
         course = {}
         if meeting.get("course_id"):
             course_response = (
-                supabase.table("course")
+                g.db.table("course")
                 .select("course_id, course_name")
                 .eq("course_id", meeting["course_id"])
                 .limit(1)
@@ -67,12 +62,11 @@ def get_dashboard():
             )
             if course_response.data:
                 course = course_response.data[0]
-        
-        # Get location details
+
         location = {}
         if meeting.get("location_id"):
             location_response = (
-                supabase.table("location")
+                g.db.table("location")
                 .select("location_id, building, room, capacity")
                 .eq("location_id", meeting["location_id"])
                 .limit(1)
@@ -80,7 +74,7 @@ def get_dashboard():
             )
             if location_response.data:
                 location = location_response.data[0]
-        
+
         joined_groups.append(
             {
                 "meeting_id": meeting.get("meeting_id"),

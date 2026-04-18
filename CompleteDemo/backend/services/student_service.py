@@ -1,9 +1,21 @@
+from flask import g, has_request_context
+
 from services.db import supabase
+
+
+def _get_db():
+    """Returns the per-request authenticated Supabase client when inside a protected
+    route (g.db is set by require_auth), otherwise falls back to the anon client.
+    """
+    if has_request_context() and hasattr(g, "db"):
+        return g.db
+    return supabase
 
 
 def fetch_student_or_none(nyu_email):
     response = (
-        supabase.table("student")
+        _get_db()
+        .table("student")
         .select("nyu_email, first_name, last_name, hashed_password, account_role")
         .eq("nyu_email", nyu_email)
         .limit(1)
@@ -13,8 +25,10 @@ def fetch_student_or_none(nyu_email):
 
 
 def fetch_profile_bundle(nyu_email):
+    db = _get_db()
+
     student_response = (
-        supabase.table("student")
+        db.table("student")
         .select("nyu_email, first_name, last_name, account_role")
         .eq("nyu_email", nyu_email)
         .limit(1)
@@ -25,7 +39,7 @@ def fetch_profile_bundle(nyu_email):
         return None
 
     course_response = (
-        supabase.table("student_course")
+        db.table("student_course")
         .select("course_id, course:course_id(course_id, course_name)")
         .eq("nyu_email", nyu_email)
         .order("course_id")
@@ -33,7 +47,7 @@ def fetch_profile_bundle(nyu_email):
     )
 
     available_time_response = (
-        supabase.table("student_available_time")
+        db.table("student_available_time")
         .select("time_id, week_day, start_time, end_time")
         .eq("nyu_email", nyu_email)
         .order("week_day")
@@ -56,7 +70,8 @@ def fetch_profile_bundle(nyu_email):
 
 def get_next_time_id():
     response = (
-        supabase.table("student_available_time")
+        _get_db()
+        .table("student_available_time")
         .select("time_id")
         .order("time_id", desc=True)
         .limit(1)
@@ -68,12 +83,8 @@ def get_next_time_id():
 
 
 def replace_courses(nyu_email, course_ids):
-    (
-        supabase.table("student_course")
-        .delete()
-        .eq("nyu_email", nyu_email)
-        .execute()
-    )
+    db = _get_db()
+    db.table("student_course").delete().eq("nyu_email", nyu_email).execute()
 
     unique_course_ids = []
     for course_id in course_ids:
@@ -85,16 +96,12 @@ def replace_courses(nyu_email, course_ids):
             {"nyu_email": nyu_email, "course_id": int(course_id)}
             for course_id in unique_course_ids
         ]
-        supabase.table("student_course").insert(payload).execute()
+        db.table("student_course").insert(payload).execute()
 
 
 def replace_available_times(nyu_email, available_times):
-    (
-        supabase.table("student_available_time")
-        .delete()
-        .eq("nyu_email", nyu_email)
-        .execute()
-    )
+    db = _get_db()
+    db.table("student_available_time").delete().eq("nyu_email", nyu_email).execute()
 
     if not available_times:
         return
@@ -112,4 +119,4 @@ def replace_available_times(nyu_email, available_times):
         )
 
     if payload:
-        supabase.table("student_available_time").insert(payload).execute()
+        db.table("student_available_time").insert(payload).execute()
